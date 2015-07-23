@@ -1,5 +1,5 @@
 <?php
-//$PASSWORD="pw";
+$PASSWORD="pw";//only used for standalone version!
 
 $options=array('admidio_path'=>'../../../../admidio',//pfad zur admidio installation
 				'org_id'=>1,				//organisations id von admidio(meist 1)
