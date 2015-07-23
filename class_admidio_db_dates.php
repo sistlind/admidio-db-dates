@@ -8,6 +8,7 @@ private    $userfieldids = array();
 private	   $roleid ='';
 private	   $orgid ='';
 private	   $tblname ='';
+private	   $options=NULL;
 
 public function __construct($options){
 	if (is_file(realpath(dirname(__FILE__).'/'.$options['admidio_path'].'/adm_my_files/config.php'))) {
@@ -22,7 +23,7 @@ public function __construct($options){
 	}
 	require_once(dirname(__FILE__).'/'.$options['admidio_path'].'/adm_program/system/constants.php');
 	$this->orgid=$options['org_id'];
-	$this->tblname=$g_tbl_praefix.'_dirtydates';
+	$this->options=$options;
 
 	$mysqli = new mysqli($g_adm_srv, $g_adm_usr, $g_adm_pw, $g_adm_db);
 
@@ -35,10 +36,16 @@ public function __construct($options){
 	}
 
 	$this->db=$mysqli;
-	$this->check_install_db();
-	$this->set_roleid($options['adm_role']);
-	$this->load_users();
 	$this->load_dates($options['dates_after'],$options['dates_before']);
+	if($options['use_dirtydates'])
+	{
+		$this->tblname=$g_tbl_praefix.'_dirtydates';
+		$this->check_install_db();
+		$this->set_roleid($options['adm_role']);
+		$this->load_users();
+		$this->load_status();
+	}
+	
 }
 function __destruct() {
 	$this->db->close();
@@ -77,7 +84,7 @@ private function set_roleid($admidio_rolename)
 
 function load_users()
 {
-$this->load_user_fields();
+	$this->load_user_fields();
 
 	//only active members
 		$memberCondition = ' AND EXISTS 
@@ -151,20 +158,22 @@ function load_dates($display_after_timestamp,$display_before_timestamp)
 			$this->dates[$date['dat_id']]=$date;
 		}
 
-	$this->load_status();
-
-		if(empty($this->dates))
-		{
-			return false;
-		}
-		else
-		{
-			return true;
-		}
+	if(empty($this->dates))
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 function load_status()
 {
+	if(!$this->options['use_dirtydates'])
+	{
+		die('Dirtydates disabled, enable in options.php!');
+	}
 	$sql='SELECT * FROM `'.$this->tblname.'`';
 
 	$status =$this->db->query($sql);
@@ -185,15 +194,21 @@ function load_status()
 }
 
 
-function save_status($userid,$changes){
+function save_status($userid,$changes)
+{
+	if(!$this->options['use_dirtydates'])
+	{
+		die('Dirtydates disabled, enable in options.php!');
+	}
 
 	//update cache	
 	$this->load_status();
-	foreach($changes as $dateid=>$status){
+	foreach($changes as $dateid=>$value){
 		$createdby='1';
 		$updatedby='2';
-		$comment='';
-		if(!isset($this->status[$userid][$dateid]['dd_status'])||($this->status[$userid][$dateid]['dd_status']!==$status)){
+		$status=$value['status'];
+		$comment=$value['comment'];
+		if(!isset($this->status[$userid][$dateid]['dd_status'])||($this->status[$userid][$dateid]['dd_status']!==$status)||($this->status[$userid][$dateid]['dd_comment']!==$comment)){
 			$sql='INSERT INTO `'.$this->tblname.'` 
 				(dd_usr_id,dd_date_id,dd_status,dd_comment,dd_usr_id_create) 
 				VALUES ('.$userid.','.$dateid.','.$status.',\''.$comment.'\',\''.$createdby.'\')
@@ -209,7 +224,10 @@ function save_status($userid,$changes){
 
 function check_install_db()
 {
-
+	if(!$this->options['use_dirtydates'])
+	{
+		die('Dirtydates disabled, enable in options.php!');
+	}
 	$sql='SHOW TABLES LIKE \''.$this->tblname.'\';';
 
 	$result =$this->db->query($sql);
@@ -224,6 +242,10 @@ function check_install_db()
 
 private function install_db()
 {
+	if(!$this->options['use_dirtydates'])
+	{
+		die('Dirtydates disabled, enable in options.php!');
+	}
 	$sql='CREATE TABLE `'.$this->tblname.'` (
 		dd_id int(10) NOT NULL auto_increment,
 		dd_date_id int(10) NOT NULL,
@@ -254,5 +276,5 @@ private function load_user_fields()
 
 //end of class
 }
-?>
 
+?>
