@@ -3,8 +3,11 @@ Wordpress Plugin um Admidio Termin in Wordpress zu präsentieren
 
 ## Beschreibung
 Mit diesem Plugin ist es möglich direkt auf die Datenbank einer parallel im Webspace liegenden Admidio Installation 
-zuzugreifen und die Termine anzuzeigen. Außerdem ist eine einfachs An/Abmelde Möglichkeit("dirtydates") von Terminen gegeben, die in einer
-extra Datentabelle abgelegt wird.
+zuzugreifen und die Termine anzuzeigen. Außerdem ist eine einfachs An/Abmelde Möglichkeit("dirtydates") von Terminen gegeben, die in einer extra Datentabelle abgelegt wird.
+
+## Standalone
+Die Standalone Version kann auch ohne wordpress genutzt werden, die Konfiguration läuft wie in Wordpress, danach einfach die Datei direkt aufrufen.
+
 
 ## Installation
 Nach ./wp-conten/plugins/admidio-db-dates kopieren, die Config Datei anpassen und im Admin-Interface Plugin aktivieren.
