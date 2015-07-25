@@ -5,18 +5,19 @@
 ## Include Admidio common for admidio-variables
 ################
 
-$options=array('admidio_path'=>'../../../admidio',//pfad zur admidio installation
-				'org_id'=>1,				//organisations id von admidio(meist 1)
-				'adm_role'=>'Mitglieder',		//Mitglieder welcher Rolle sollen angezeigt werden
-				'dates_after'=>time()-(60*60*24)*1,//Nur bis gestern laden
-				'dates_before'=>time()+(60*60*24)*62,//Nur die nächsten 2 Monate
-				'use_dirtydates'=>true,//Dirtydates funktion wird genutzt und tabelle angelegt
-);
+
 require_once(substr(__FILE__, 0,strpos(__FILE__, 'adm_plugins')-1).'/adm_program/system/common.php');
 require_once(SERVER_PATH. '/adm_program/system/classes/formelements.php');
 require_once(SERVER_PATH. '/adm_program/system/classes/tabletext.php');
 
 
+$options=array('admidio_path'=>'../../../admidio',//pfad zur admidio installation
+				'org_id'=>$gCurrentOrganization->getValue('org_id'),				//organisations id von admidio(meist 1)
+				'adm_role'=>'Mitglieder',		//Mitglieder welcher Rolle sollen angezeigt werden
+				'dates_after'=>time()-(60*60*24)*1,//Nur bis gestern laden
+				'dates_before'=>time()+(60*60*24)*62,//Nur die nächsten 2 Monate
+				'use_dirtydates'=>true,//Dirtydates funktion wird genutzt und tabelle angelegt
+);
 
 
 if (!function_exists('print_dirtydates_menu')) {
@@ -72,12 +73,7 @@ function dirtydates($userid,$options)
 	//-----------------------------------
 	if (isset($_REQUEST['status_changed']))
 	{
-	/*
-	echo "<pre>";
-	print_r($_REQUEST);
-	echo "-------------Parse Request------------<br>";
-	*/
-		if(($gCurrentUser->getValue('usr_id')!==($userid))||($gCurrentUser->editUsers() === true))
+		if(!(($gCurrentUser->getValue('usr_id')===($userid))||($gCurrentUser->editUsers() === true)))
 		{
 			return 'Not allowed!';
 		}
