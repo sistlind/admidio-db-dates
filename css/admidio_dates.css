@@ -1,3 +1,23 @@
-.oldevent td{
-	color:gray;
+.oldevent p, .oldevent td{
+	color:gray!important;
+}
+
+.admidio_dates_table th:nth-child(1),.admidio_dates_table td:nth-child(1){
+	width:100px!important;
+}
+#dirtydates_user{
+    font-size: 3em!important;
+	color:red!important;
+	margin-top:100px;
+}
+
+.admidio_dirtydates_overview_table table{
+margin-top:10px!important;
+width:auto!important;}
+.admidio_dirtydates_overview_table table td{
+width:80px!important;}
+
+
+.admidio_dirtydates_overview_table th:nth-child(1),.admidio_dirtydates_overview_table td:nth-child(1){
+	width:100px!important;
 }
