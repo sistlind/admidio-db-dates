@@ -93,12 +93,14 @@ function show_dates($atts){
 
 		$out.="<td>".$date['dat_headline']."</td>";
 		$out.="<td>".$date['dat_location']."</td>";
-		$out.="<td>".$date['dat_description']."</td>";
+		preg_match('/<p>\s(.*)<\/p>/s',$date['dat_description'],$matches);
+		//print_r($matches);
+		$out.="<td>".$matches[1]."</td>";
 		$out.="</tr>";
 
 	}
 
-	$out.="</tbody></table>";
+	$out.="</tbody></table></div>";
 	$out.="<div>";
 	//Display form to change year
 	$form='<h2>Frühere Termine</h2>';
@@ -113,7 +115,7 @@ function show_dates($atts){
 		}
 	$form.='</select>';
 	$form.='<input type="submit" value="Jahr ändern" name="send" id="cf_send" />';
-	$form.='</form>';
+	$form.='</form></div>';
 
 
 	$out.=$form;
@@ -188,7 +190,8 @@ function dirtydates($atts)
 	if($userid =='--' or !isset($userid))
 	{
 		//tabelle erzeugen
-		$out="<table width=200 border=1>\n<tr>";
+		$out="<div class=admidio_dirtydates_overview_table>";
+		$out.="<table>\n<tr>";
 		$out.="<th>Name</th>";
 		foreach( $dd->dates as $date)
 		{
@@ -227,9 +230,9 @@ function dirtydates($atts)
 				}else{
 					$status=false;
 				}
-				if ($status==2) $out.= "<TD class=\"admidio_dirtydates_status\" BGCOLOR=red id=\"".$dataID[$i]."\">";
-				else if ($status==1)$out.= "<TD class=\"admidio_dirtydates_status\" BGCOLOR=green id=\"".$dataID[$i]."\">";
-				else if ($status==3)$out.= "<TD class=\"admidio_dirtydates_status\" BGCOLOR=yellow id=\"".$dataID[$i]."\">";
+				if ($status==2) $out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:red;\" id=\"".$dataID[$i]."\">";
+				else if ($status==1)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:green;\" id=\"".$dataID[$i]."\">";
+				else if ($status==3)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:yellow;\" id=\"".$dataID[$i]."\">";
 				else $out.= "<TD id=\"".$dataID[$i]."\">";
 			
 				if(!empty($dd->status[$user['usr_id']][$dataID[$i]]['dd_comment']))
@@ -242,7 +245,7 @@ function dirtydates($atts)
 			}
 			$out.= "</tr>\n";
 		}
-		$out.= "</table>";
+		$out.= "</table></div>";
 	}
 	//------------------------------------
 	//Seite für Zu-/Absagen darstellen
@@ -255,9 +258,10 @@ function dirtydates($atts)
 			$out.=('<p>Fehler, User mit id "'.$userid.'" nicht gefunden!</p>');
 			return $out;
 		}
-		$out.= "<p><font size=+4 color=red>".$user['first_name']." ".$user['last_name']."</font></p>\n";
+		$out.="<div class=admidio_dirtydates_change_table>";
+		$out.= "<p id=dirtydates_user>".$user['first_name']." ".$user['last_name']."</p>\n";
 		$out.= "<form action=".get_permalink()." method=post>";
-		$out.= "<table border=1>\n";
+		$out.= "<table>\n";
 		$out.= '<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th><th>JA&nbsp;-&nbsp;?&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th><th>Kommentar</th></tr>';
 
 
@@ -294,7 +298,7 @@ function dirtydates($atts)
 		$out.= "<input type=hidden name=status_changed value=1>\n";
 		$out.= "<input type=hidden name=dd_userid value=".$userid.">\n";
 		$out.= "<input type=\"submit\" value=\"Änderungen speichern\">\n";
-		$out.= "</form>\n";
+		$out.= "</form></div>\n";
 	}
 
 return $form.$out;
