@@ -100,7 +100,7 @@ function show_dates($atts){
 
 	}
 
-	$out.="</tbody></table>";
+	$out.="</tbody></table></div>";
 	$out.="<div>";
 	//Display form to change year
 	$form='<h2>Frühere Termine</h2>';
@@ -115,7 +115,7 @@ function show_dates($atts){
 		}
 	$form.='</select>';
 	$form.='<input type="submit" value="Jahr ändern" name="send" id="cf_send" />';
-	$form.='</form>';
+	$form.='</form></div>';
 
 
 	$out.=$form;
