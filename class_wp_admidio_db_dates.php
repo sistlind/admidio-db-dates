@@ -192,6 +192,7 @@ function dirtydates($atts)
 		//tabelle erzeugen
 		$out="<div class=admidio_dirtydates_overview_table>";
 		$out.="<table>\n<tr>";
+		$out.="<th>Gruppe</th>";
 		$out.="<th>Name</th>";
 		foreach( $dd->dates as $date)
 		{
@@ -201,6 +202,7 @@ function dirtydates($atts)
 			$dataID[]=$date['dat_id'];
 		}
 		$out.= "</tr>\n<tr>";
+		$out.= "<td></td>";
 		$out.= "<td>Termin</td>";
 		foreach($dd->dates as $date)
 		{
@@ -221,6 +223,7 @@ function dirtydates($atts)
 		foreach( $dd->users as $user)
 		{
 			$out.= "<tr>";
+			$out.= "<td>".$user['grouping']."</td>";
 			$out.= "<td><a href=".get_permalink()."?dd_userid=".$user['usr_id'].">".$user['first_name'].'&nbsp;'.$user['last_name']."</a></td>";
 
 			for ($i = 0; $i < count($dataID); $i++) {

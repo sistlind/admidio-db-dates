@@ -13,7 +13,8 @@ require_once(SERVER_PATH. '/adm_program/system/classes/tabletext.php');
 
 $options=array('admidio_path'=>'../../../admidio',//pfad zur admidio installation
 				'org_id'=>$gCurrentOrganization->getValue('org_id'),				//organisations id von admidio(meist 1)
-				'adm_role'=>'Mitglieder',		//Mitglieder welcher Rolle sollen angezeigt werden
+				'adm_role'=>'Mitglied',		//Mitglieder welcher Rolle sollen angezeigt werden
+				'group_field'=>'register',		//Feld, nachdem die Mitglieder gruppiert werden sollen
 				'dates_after'=>time()-(60*60*24)*1,//Nur bis gestern laden
 				'dates_before'=>time()+(60*60*24)*62,//Nur die nächsten 2 Monate
 				'use_dirtydates'=>true,//Dirtydates funktion wird genutzt und tabelle angelegt
@@ -105,6 +106,7 @@ function dirtydates($userid,$options)
 	{
 		//tabelle erzeugen
 		$out="<table width=200 border=1>\n<tr>";
+		$out.="<th>Gruppe</th>";
 		$out.="<th>Name</th>";
 		foreach( $dd->dates as $date)
 		{
@@ -114,6 +116,7 @@ function dirtydates($userid,$options)
 			$dataID[]=$date['dat_id'];
 		}
 		$out.= "</tr>\n<tr>";
+		$out.= "<td></td>";
 		$out.= "<td>Termin</td>";
 		foreach($dd->dates as $date)
 		{
@@ -134,6 +137,7 @@ function dirtydates($userid,$options)
 		foreach( $dd->users as $user)
 		{
 			$out.= "<tr>";
+			$out.= "<td>".$user['grouping']."</td>";
 		if(!(($gCurrentUser->getValue('usr_id')===($user['usr_id']))||($gCurrentUser->editUsers() === true)))
 		{//only show name for others
 			$out.= "<td>".$user['first_name'].'&nbsp;'.$user['last_name']."</td>";

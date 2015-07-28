@@ -101,8 +101,9 @@ function load_users()
 		        AND (  cat_org_id = '. $this->orgid. '
 		            OR cat_org_id IS NULL )) ';
 	$searchCondition="";
-	$sql    = 'SELECT usr_id, last_name.usd_value as last_name, first_name.usd_value as first_name, birthday.usd_value as birthday                  
-		         FROM `adm_users`
+//	$orderCondition="ORDER BY last_name.usd_value, first_name.usd_value";
+	$orderCondition="ORDER BY grouping,last_name, first_name";
+	$sql    = 'SELECT usr_id, last_name.usd_value as last_name, first_name.usd_value as first_name, birthday.usd_value as birthday, grouping.usd_value as grouping FROM `adm_users`
 		         JOIN `adm_user_data` as last_name
 		           ON last_name.usd_usr_id = usr_id
 		          AND last_name.usd_usf_id = '. $this->userfieldids['LAST_NAME']. '
@@ -112,12 +113,16 @@ function load_users()
 		         LEFT JOIN `adm_user_data` as birthday
 		           ON birthday.usd_usr_id = usr_id
 		          AND birthday.usd_usf_id = '. $this->userfieldids['BIRTHDAY']. '
-		         WHERE usr_valid = 1'.$memberCondition.$searchCondition.' ORDER BY last_name.usd_value, first_name.usd_value';
-
+		         LEFT JOIN `adm_user_data` as grouping
+		           ON grouping.usd_usr_id = usr_id
+		          AND grouping.usd_usf_id = '. $this->userfieldids[strtoupper($this->options['group_field'])]. '
+		         WHERE usr_valid = 1'.$memberCondition.$searchCondition.' '.$orderCondition.';';
 	$users=$this->db->query($sql);
 
-	if($users->num_rows===0)
-	{
+
+	if($users->num_rows==0)
+	{	
+		echo "No user found @role ".$this->options['adm_role'];
 		return false;
 	}
 
