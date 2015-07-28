@@ -103,7 +103,8 @@ function load_users()
 		            OR cat_org_id IS NULL )) ';
 	$searchCondition="";
 //	$orderCondition="ORDER BY last_name.usd_value, first_name.usd_value";
-	$orderCondition="ORDER BY grouping,last_name, first_name";
+	$orderCondition="ORDER grouping, last_name, first_name";//unsortierte am Anfang
+	$orderCondition="ORDER BY CASE WHEN grouping is null THEN 1 ELSE 0 END, grouping, last_name, first_name";//unsortierte am Ende
 	$sql    = 'SELECT usr_id, last_name.usd_value as last_name, first_name.usd_value as first_name, birthday.usd_value as birthday, grouping.usd_value as grouping FROM `adm_users`
 		         JOIN `adm_user_data` as last_name
 		           ON last_name.usd_usr_id = usr_id
