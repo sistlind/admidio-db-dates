@@ -137,7 +137,7 @@ function dirtydates($userid,$options)
 		foreach( $dd->users as $user)
 		{
 			$out.= "<tr>";
-			$out.= "<td>".$user['grouping']."</td>";
+			$out.= "<td>".$user['group_name']."</td>";
 		if(!(($gCurrentUser->getValue('usr_id')===($user['usr_id']))||($gCurrentUser->editUsers() === true)))
 		{//only show name for others
 			$out.= "<td>".$user['first_name'].'&nbsp;'.$user['last_name']."</td>";

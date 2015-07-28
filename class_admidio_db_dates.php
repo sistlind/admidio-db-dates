@@ -85,6 +85,7 @@ private function set_roleid($admidio_rolename)
 function load_users()
 {
 	$this->load_user_fields();
+	$grouping_field=strtoupper($this->options['group_field']);
 
 	//only active members
 		$memberCondition = ' AND EXISTS 
@@ -106,16 +107,16 @@ function load_users()
 	$sql    = 'SELECT usr_id, last_name.usd_value as last_name, first_name.usd_value as first_name, birthday.usd_value as birthday, grouping.usd_value as grouping FROM `adm_users`
 		         JOIN `adm_user_data` as last_name
 		           ON last_name.usd_usr_id = usr_id
-		          AND last_name.usd_usf_id = '. $this->userfieldids['LAST_NAME']. '
+		          AND last_name.usd_usf_id = '. $this->userfieldids['LAST_NAME']['usf_id']. '
 		         JOIN `adm_user_data` as first_name
 		           ON first_name.usd_usr_id = usr_id
-		          AND first_name.usd_usf_id = '.$this->userfieldids['FIRST_NAME']. '
+		          AND first_name.usd_usf_id = '.$this->userfieldids['FIRST_NAME']['usf_id']. '
 		         LEFT JOIN `adm_user_data` as birthday
 		           ON birthday.usd_usr_id = usr_id
-		          AND birthday.usd_usf_id = '. $this->userfieldids['BIRTHDAY']. '
+		          AND birthday.usd_usf_id = '. $this->userfieldids['BIRTHDAY']['usf_id']. '
 		         LEFT JOIN `adm_user_data` as grouping
 		           ON grouping.usd_usr_id = usr_id
-		          AND grouping.usd_usf_id = '. $this->userfieldids[strtoupper($this->options['group_field'])]. '
+		          AND grouping.usd_usf_id = '. $this->userfieldids[$grouping_field]['usf_id']. '
 		         WHERE usr_valid = 1'.$memberCondition.$searchCondition.' '.$orderCondition.';';
 	$users=$this->db->query($sql);
 
@@ -131,6 +132,14 @@ function load_users()
 	while($user = $users->fetch_array())
 	{
 		$this->users[$user['usr_id']]=$user;
+		if($this->userfieldids[$grouping_field]['usf_type']==='DROPDOWN')
+		{
+			$groupnames=explode("\n",$this->userfieldids[$grouping_field]['usf_value_list']);
+			$this->users[$user['usr_id']]['group_name']=$groupnames[intval($user['grouping'])-1];
+		}else
+		{
+			$this->users[$user['usr_id']]['group_name']=$user['grouping'];
+		}
 	}
 
 	if(empty($this->users))
@@ -272,7 +281,7 @@ private function load_user_fields()
 	$userfields =$this->db->query($sql);
 	while($userfield = $userfields->fetch_array())
 	{
-		$this->userfieldids[$userfield['usf_name_intern']]=$userfield['usf_id'];
+		$this->userfieldids[$userfield['usf_name_intern']]=$userfield;
 	}
 
 }

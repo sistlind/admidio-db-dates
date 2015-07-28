@@ -223,7 +223,7 @@ function dirtydates($atts)
 		foreach( $dd->users as $user)
 		{
 			$out.= "<tr>";
-			$out.= "<td>".$user['grouping']."</td>";
+			$out.= "<td>".$user['group_name']."</td>";
 			$out.= "<td><a href=".get_permalink()."?dd_userid=".$user['usr_id'].">".$user['first_name'].'&nbsp;'.$user['last_name']."</a></td>";
 
 			for ($i = 0; $i < count($dataID); $i++) {
