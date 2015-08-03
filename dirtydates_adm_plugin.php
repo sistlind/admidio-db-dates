@@ -10,15 +10,9 @@ require_once(substr(__FILE__, 0,strpos(__FILE__, 'adm_plugins')-1).'/adm_program
 require_once(SERVER_PATH. '/adm_program/system/classes/formelements.php');
 require_once(SERVER_PATH. '/adm_program/system/classes/tabletext.php');
 
+require_once(dirname(__FILE__).'/admidio_db_dates_config.php');
 
-$options=array('admidio_path'=>'../../../admidio',//pfad zur admidio installation
-				'org_id'=>$gCurrentOrganization->getValue('org_id'),				//organisations id von admidio(meist 1)
-				'adm_role'=>'Mitglieder',		//Mitglieder welcher Rolle sollen angezeigt werden
-				'group_field'=>'register',		//Feld, nachdem die Mitglieder gruppiert werden sollen
-				'dates_after'=>time()-(60*60*24)*1,//Nur bis gestern laden
-				'dates_before'=>time()+(60*60*24)*62,//Nur die nächsten 2 Monate
-				'use_dirtydates'=>true,//Dirtydates funktion wird genutzt und tabelle angelegt
-);
+$options['org_id']=$gCurrentOrganization->getValue('org_id');//set current orgid
 
 
 if (!function_exists('print_dirtydates_menu')) {

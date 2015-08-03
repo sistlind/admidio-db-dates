@@ -219,10 +219,10 @@ function dirtydates($atts)
 			$out.= "</td>";
 		}
 		$out.= "</tr>\n";
-
-		foreach( $dd->users as $user)
+			foreach( $dd->users as $i=>$user)
 		{
-			$out.= "<tr>";
+	
+			$out.= '<tr class="groups group_'.$user['grouping'].'">';
 			$out.= "<td>".$user['group_name']."</td>";
 			$out.= "<td><a href=".get_permalink()."?dd_userid=".$user['usr_id'].">".$user['first_name'].'&nbsp;'.$user['last_name']."</a></td>";
 
@@ -233,9 +233,9 @@ function dirtydates($atts)
 				}else{
 					$status=false;
 				}
-				if ($status==2) $out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:red;\" id=\"".$dataID[$i]."\">";
-				else if ($status==1)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:green;\" id=\"".$dataID[$i]."\">";
-				else if ($status==3)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:yellow;\" id=\"".$dataID[$i]."\">";
+				if ($status==2) $out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:red!important;\" id=\"".$dataID[$i]."\">";
+				else if ($status==1)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:green!important;\" id=\"".$dataID[$i]."\">";
+				else if ($status==3)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:yellow!important;\" id=\"".$dataID[$i]."\">";
 				else $out.= "<TD id=\"".$dataID[$i]."\">";
 			
 				if(!empty($dd->status[$user['usr_id']][$dataID[$i]]['dd_comment']))
