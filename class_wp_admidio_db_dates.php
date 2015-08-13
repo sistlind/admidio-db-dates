@@ -235,7 +235,7 @@ function dirtydates($atts)
 				}
 				if ($status==2) $out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:red!important;\" id=\"".$dataID[$i]."\">";
 				else if ($status==1)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:green!important;\" id=\"".$dataID[$i]."\">";
-				else if ($status==3)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:yellow!important;\" id=\"".$dataID[$i]."\">";
+				else if (($status==3)&&self::$options['allow_maybe'])$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:yellow!important;\" id=\"".$dataID[$i]."\">";
 				else $out.= "<TD id=\"".$dataID[$i]."\">";
 			
 				if(!empty($dd->status[$user['usr_id']][$dataID[$i]]['dd_comment']))
@@ -265,8 +265,13 @@ function dirtydates($atts)
 		$out.= "<p id=dirtydates_user>".$user['first_name']." ".$user['last_name']."</p>\n";
 		$out.= "<form action=".get_permalink()." method=post>";
 		$out.= "<table>\n";
-		$out.= '<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th><th>JA&nbsp;-&nbsp;?&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th><th>Kommentar</th></tr>';
-
+		if((self::$options['allow_maybe']))
+		{
+			$out.= '<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th><th>JA&nbsp;-&nbsp;?&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th><th>Kommentar</th></tr>';
+		}else
+		{
+			$out.= '<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th><th>JA&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th><th>Kommentar</th></tr>';
+		}
 
 		foreach($dd->dates as $date)
 		{//pro termin eine reihe!
@@ -283,17 +288,20 @@ function dirtydates($atts)
 				$checked_perhaps='';
 				if ($oldstatus[0]==2) $checked_no='checked';
 				else if ($oldstatus[0]==1)$checked_yes='checked';
-				else if ($oldstatus[0]==3)$checked_perhaps='checked';
+				else if (($oldstatus[0]==3)&&(self::$options['allow_maybe']))$checked_perhaps='checked';
 			$out.= "\n<tr>";
 			$out.= "<td>".$date['dat_headline']."</td>";
 			$out.= "<td>".date_i18n('D, d.m.y </br> \u\m G:i',$time)."</td>";
 			$out.= "<td>".$date['dat_description']."</td>";
 
 
-			$out.= "<td><input type=radio name=status_new_".$date['dat_id']." value=1 ".$checked_yes."> 
-				<input type=radio name=status_new_".$date['dat_id']." value=3 ".$checked_perhaps.">
-				<input type=radio name=status_new_".$date['dat_id']." value=2 ".$checked_no.">
-				<input type=radio name=status_new_".$date['dat_id']." value=0 ></td>";
+			$out.= "<td><input type=radio name=status_new_".$date['dat_id']." value=1 ".$checked_yes.">";
+			if((self::$options['allow_maybe']))
+			{
+				$out.= "<input type=radio name=status_new_".$date['dat_id']." value=3 ".$checked_perhaps.">";
+			}
+			$out.= "<input type=radio name=status_new_".$date['dat_id']." value=2 ".$checked_no.">";
+			$out.= "<input type=radio name=status_new_".$date['dat_id']." value=0 ></td>";
 			$out.= "<td><input type=text name=status_new_comment_".$date['dat_id']." value=\"".$oldcomment."\">"; 
 			$out.= "</tr>\n";
 			}
