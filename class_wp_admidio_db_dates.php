@@ -166,15 +166,16 @@ function dirtydates($atts)
 	$changes=array();
 	foreach($_REQUEST as $key=>$value)
 	{
-		preg_match('/^status_new_([0-9]+)/', $key, $match);
+		preg_match('/^status_new[_a-z]*_([0-9]+)/', $key, $match);
 		if(!isset($match[1])){continue;}
 		$dateid=$match[1];
 
-		/*print_r($match);
-		echo $dateid." changed to ".$value."<br>";
-		*/
-		$changes[$dateid]['status']=intval($value);
+		$changes[$dateid]['status']=intval($_REQUEST['status_new_'.$dateid]);
 		$changes[$dateid]['comment']=htmlspecialchars($_REQUEST['status_new_comment_'.$dateid]);
+
+		/*print_r($match);
+		echo $dateid." changed to ".$changes[$dateid]['status']."(".$changes[$dateid]['comment'].")"."<br>";
+		*/
 	}
 
 	$dd->save_status($userid,$changes);
