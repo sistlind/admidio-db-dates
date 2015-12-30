@@ -72,17 +72,17 @@ function show_dates($atts){
 
 
 		$out.="<td>".date_i18n('D, d.m.y',$starttime);
-			if (date('H:i',$starttime)=="00:00")
+			if ((date('H:i',$starttime)=="00:00")&&(date('H:i',$endtime)=="00:00"))
 			{
-				if (($endtime-$starttime)<60*60*24){
-					$out.="</br> ~</td>";
+				if (($endtime-$starttime)<=60*60*24){
+					$out.="</td>";
 				}else{
 					$out.="</br> bis </br>".date_i18n('D, d.m',$endtime)."</td>";
 				}
 
 			}else
 			{
-				if (($endtime-$starttime)<60*60*24){
+				if (($endtime-$starttime)<=60*60*24){
 					$out.="</br> ".date('H:i',$starttime);
 					$out.="-".date('H:i',$endtime)."</td>";
 				}else{
