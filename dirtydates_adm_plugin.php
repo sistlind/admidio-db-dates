@@ -155,7 +155,7 @@ function dirtydates($userid,$options)
 				}
 				if ($status==2) $out.= "<TD class=\"admidio_dirtydates_status\" BGCOLOR=red id=\"".$dataID[$i]."\">";
 				else if ($status==1)$out.= "<TD class=\"admidio_dirtydates_status\" BGCOLOR=green id=\"".$dataID[$i]."\">";
-				else if ($status==3)$out.= "<TD class=\"admidio_dirtydates_status\" BGCOLOR=yellow id=\"".$dataID[$i]."\">";
+				else if ($status==3 && $options['allow_maybe'])$out.= "<TD class=\"admidio_dirtydates_status\" BGCOLOR=yellow id=\"".$dataID[$i]."\">";
 				else $out.= "<TD id=\"".$dataID[$i]."\">";
 			
 				if(!empty($dd->status[$user['usr_id']][$dataID[$i]]['dd_comment']))

@@ -30,7 +30,7 @@
 
 require_once(dirname(__FILE__).'/class_wp_admidio_db_dates.php');
 
-$admidio_db_dates = new wp_admidio_db_dates;
+$admidio_db_dates = new wp_admidio_db_dates();
 /**
  * During uninstallation, remove the custom field from the users and delete the local avatars
  *

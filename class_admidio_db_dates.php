@@ -25,16 +25,16 @@ public function __construct($options){
 	require_once(dirname(__FILE__).'/'.$options['admidio_path'].'/adm_program/system/constants.php');
 	$this->orgid=$options['org_id'];
 	$this->options=$options;
-
 	try {
 
 	  # MySQL with PDO_MYSQL
-	  	$this->db= new PDO("mysql:host=$g_adm_srv;dbname=$g_adm_db;charset=utf8", $g_adm_usr, $g_adm_pw);
+	  	$this->db= new PDO("mysql:host=$g_adm_srv;dbname=$g_adm_db", $g_adm_usr, $g_adm_pw);
+		$this->db->exec("set names utf8");
 	 }
 	catch(PDOException $e) {
 		echo $e->getMessage();
 	}
-	
+
 	if(!$this->load_dates($options['dates_after'],$options['dates_before']))
 	{
 	//echo "No dates found";
@@ -43,9 +43,11 @@ public function __construct($options){
 	{
 		$this->set_roleid($options['adm_role']);
 		$this->tblname=$g_tbl_praefix.'_dirtydates';
+
 		$this->check_install_db();
 
 		$this->load_users();
+
 		$this->load_status();
 	}
 
@@ -113,14 +115,14 @@ $grouping='LEFT JOIN '.TBL_USER_DATA.' as grouping
 		           ON grouping.usd_usr_id = usr_id
 		          AND grouping.usd_usf_id = '. $this->userfieldids[$grouping_field]['usf_id'];
 	$orderCondition="ORDER grouping, last_name, first_name";//unsortierte am Anfang
-	//$orderCondition="ORDER BY CASE WHEN grouping is null THEN 1 ELSE 0 END, grouping, last_name, first_name";//unsortierte am Ende
+	$orderCondition="ORDER BY CASE WHEN grouping is null THEN 1 ELSE 0 END, grouping, last_name, first_name";//unsortierte am Ende
 }else
 {
 $grouping_select="";
 $grouping="";
 $orderCondition="ORDER BY last_name.usd_value, first_name.usd_value";
 }
-	$sql    = 'SELECT usr_id, last_name.usd_value as last_name, first_name.usd_value as first_name, birthday.usd_value as birthday '.$grouping_select.' FROM '. TBL_USERS. '
+	$sql    = 'SELECT usr_id, last_name.usd_value as last_name, first_name.usd_value as first_name, birthday.usd_value as birthday'.$grouping_select.' FROM '. TBL_USERS. '
 		         JOIN '.TBL_USER_DATA.' as last_name
 		           ON last_name.usd_usr_id = usr_id
 		          AND last_name.usd_usf_id = '. $this->userfieldids['LAST_NAME']['usf_id']. '
@@ -129,25 +131,29 @@ $orderCondition="ORDER BY last_name.usd_value, first_name.usd_value";
 		          AND first_name.usd_usf_id = '.$this->userfieldids['FIRST_NAME']['usf_id']. '
 		         LEFT JOIN '.TBL_USER_DATA.' as birthday
 		           ON birthday.usd_usr_id = usr_id
-		          AND birthday.usd_usf_id = '. $this->userfieldids['BIRTHDAY']['usf_id'].
+		          AND birthday.usd_usf_id = '. $this->userfieldids['BIRTHDAY']['usf_id'].' '.
 				$grouping. '
 		         WHERE usr_valid = 1'.$memberCondition.$searchCondition.' '.$orderCondition.';';
+
 	$users=$this->db->query($sql);
 
-/*	if(empty($users))
+	if($users==null)
 	{	
 		echo "No user found @role ".$this->options['adm_role'];
 		return false;
 	}
-*/
-	$this->users = array();
 
+
+	$this->users = array();
 	while($user = $users->fetch())
 	{
+
 		$this->users[$user['usr_id']]=$user;
+
 		if (!empty($grouping_field)){
 			if($this->userfieldids[$grouping_field]['usf_type']==='DROPDOWN')
 			{
+
 				$groupnames=explode("\n",$this->userfieldids[$grouping_field]['usf_value_list']);
 				$this->users[$user['usr_id']]['group_name']=$groupnames[intval($user['grouping'])-1];
 			}else

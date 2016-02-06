@@ -11,6 +11,9 @@ class wp_admidio_db_dates {
 	public function __construct() {
 		require_once(dirname(__FILE__).'/class_admidio_db_dates.php');
 		require_once(dirname(__FILE__).'/admidio_db_dates_config.php');
+
+
+
 		//Get default options
 		self::$options = $options;
 	
@@ -43,6 +46,7 @@ function show_dates($atts){
 	{
 	self::$options['dates_before']=mktime(0, 0, 0, 31, 1, $year+1);
 	}
+	self::$options['use_dirtydates']=false;
 	$dd =new class_admidio_db_dates(self::$options);
 
 	$out='';
@@ -119,7 +123,6 @@ function show_dates($atts){
 
 
 	$out.=$form;
-
 	unset($dd);
 	return $out;
 }
