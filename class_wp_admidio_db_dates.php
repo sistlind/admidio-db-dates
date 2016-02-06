@@ -72,17 +72,17 @@ function show_dates($atts){
 
 
 		$out.="<td>".date_i18n('D, d.m.y',$starttime);
-			if (date('H:i',$starttime)=="00:00")
+			if ((date('H:i',$starttime)=="00:00")&&(date('H:i',$endtime)=="00:00"))
 			{
-				if (($endtime-$starttime)<60*60*24){
-					$out.="</br> ~</td>";
+				if (($endtime-$starttime)<=60*60*24){
+					$out.="</td>";
 				}else{
 					$out.="</br> bis </br>".date_i18n('D, d.m',$endtime)."</td>";
 				}
 
 			}else
 			{
-				if (($endtime-$starttime)<60*60*24){
+				if (($endtime-$starttime)<=60*60*24){
 					$out.="</br> ".date('H:i',$starttime);
 					$out.="-".date('H:i',$endtime)."</td>";
 				}else{
@@ -166,15 +166,16 @@ function dirtydates($atts)
 	$changes=array();
 	foreach($_REQUEST as $key=>$value)
 	{
-		preg_match('/^status_new_([0-9]+)/', $key, $match);
+		preg_match('/^status_new[_a-z]*_([0-9]+)/', $key, $match);
 		if(!isset($match[1])){continue;}
 		$dateid=$match[1];
 
-		/*print_r($match);
-		echo $dateid." changed to ".$value."<br>";
-		*/
-		$changes[$dateid]['status']=intval($value);
+		$changes[$dateid]['status']=intval($_REQUEST['status_new_'.$dateid]);
 		$changes[$dateid]['comment']=htmlspecialchars($_REQUEST['status_new_comment_'.$dateid]);
+
+		/*print_r($match);
+		echo $dateid." changed to ".$changes[$dateid]['status']."(".$changes[$dateid]['comment'].")"."<br>";
+		*/
 	}
 
 	$dd->save_status($userid,$changes);
@@ -219,10 +220,10 @@ function dirtydates($atts)
 			$out.= "</td>";
 		}
 		$out.= "</tr>\n";
-
-		foreach( $dd->users as $user)
+			foreach( $dd->users as $i=>$user)
 		{
-			$out.= "<tr>";
+	
+			$out.= '<tr class="groups group_'.$user['grouping'].'">';
 			$out.= "<td>".$user['group_name']."</td>";
 			$out.= "<td><a href=".get_permalink()."?dd_userid=".$user['usr_id'].">".$user['first_name'].'&nbsp;'.$user['last_name']."</a></td>";
 
@@ -233,9 +234,9 @@ function dirtydates($atts)
 				}else{
 					$status=false;
 				}
-				if ($status==2) $out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:red;\" id=\"".$dataID[$i]."\">";
-				else if ($status==1)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:green;\" id=\"".$dataID[$i]."\">";
-				else if ($status==3)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:yellow;\" id=\"".$dataID[$i]."\">";
+				if ($status==2) $out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:red!important;\" id=\"".$dataID[$i]."\">";
+				else if ($status==1)$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:green!important;\" id=\"".$dataID[$i]."\">";
+				else if (($status==3)&&self::$options['allow_maybe'])$out.= "<TD class=\"admidio_dirtydates_status\" style=\"background-color:yellow!important;\" id=\"".$dataID[$i]."\">";
 				else $out.= "<TD id=\"".$dataID[$i]."\">";
 			
 				if(!empty($dd->status[$user['usr_id']][$dataID[$i]]['dd_comment']))
@@ -265,8 +266,13 @@ function dirtydates($atts)
 		$out.= "<p id=dirtydates_user>".$user['first_name']." ".$user['last_name']."</p>\n";
 		$out.= "<form action=".get_permalink()." method=post>";
 		$out.= "<table>\n";
-		$out.= '<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th><th>JA&nbsp;-&nbsp;?&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th><th>Kommentar</th></tr>';
-
+		if((self::$options['allow_maybe']))
+		{
+			$out.= '<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th><th>JA&nbsp;-&nbsp;?&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th><th>Kommentar</th></tr>';
+		}else
+		{
+			$out.= '<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th><th>JA&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th><th>Kommentar</th></tr>';
+		}
 
 		foreach($dd->dates as $date)
 		{//pro termin eine reihe!
@@ -283,17 +289,20 @@ function dirtydates($atts)
 				$checked_perhaps='';
 				if ($oldstatus[0]==2) $checked_no='checked';
 				else if ($oldstatus[0]==1)$checked_yes='checked';
-				else if ($oldstatus[0]==3)$checked_perhaps='checked';
+				else if (($oldstatus[0]==3)&&(self::$options['allow_maybe']))$checked_perhaps='checked';
 			$out.= "\n<tr>";
 			$out.= "<td>".$date['dat_headline']."</td>";
 			$out.= "<td>".date_i18n('D, d.m.y </br> \u\m G:i',$time)."</td>";
 			$out.= "<td>".$date['dat_description']."</td>";
 
 
-			$out.= "<td><input type=radio name=status_new_".$date['dat_id']." value=1 ".$checked_yes."> 
-				<input type=radio name=status_new_".$date['dat_id']." value=3 ".$checked_perhaps.">
-				<input type=radio name=status_new_".$date['dat_id']." value=2 ".$checked_no.">
-				<input type=radio name=status_new_".$date['dat_id']." value=0 ></td>";
+			$out.= "<td><input type=radio name=status_new_".$date['dat_id']." value=1 ".$checked_yes.">";
+			if((self::$options['allow_maybe']))
+			{
+				$out.= "<input type=radio name=status_new_".$date['dat_id']." value=3 ".$checked_perhaps.">";
+			}
+			$out.= "<input type=radio name=status_new_".$date['dat_id']." value=2 ".$checked_no.">";
+			$out.= "<input type=radio name=status_new_".$date['dat_id']." value=0 ></td>";
 			$out.= "<td><input type=text name=status_new_comment_".$date['dat_id']." value=\"".$oldcomment."\">"; 
 			$out.= "</tr>\n";
 			}

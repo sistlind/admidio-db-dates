@@ -9,7 +9,9 @@
 require_once(substr(__FILE__, 0,strpos(__FILE__, 'adm_plugins')-1).'/adm_program/system/common.php');
 #require_once(SERVER_PATH. '/adm_program/system/classes/formelements.php');
 require_once(SERVER_PATH. '/adm_program/system/classes/tabletext.php');
-require_once(SERVER_PATH. '/adm_plugins/admidio-db-dates/admidio_db_dates_config.php');
+require_once(dirname(__FILE__).'/admidio_db_dates_config.php');
+
+$options['org_id']=$gCurrentOrganization->getValue('org_id');//set current orgid
 
 
 if (!function_exists('print_dirtydates_menu')) {

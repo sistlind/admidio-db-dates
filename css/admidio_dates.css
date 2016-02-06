@@ -19,5 +19,30 @@ width:80px!important;}
 
 
 .admidio_dirtydates_overview_table th:nth-child(1),.admidio_dirtydates_overview_table td:nth-child(1){
+	width:70px!important;
+}
+.admidio_dirtydates_overview_table th:nth-child(2),.admidio_dirtydates_overview_table td:nth-child(2){
 	width:100px!important;
+}
+
+tr.group_1 td {
+  background: #cedff6!important;
+}
+tr.group_2 td {
+  background: #eaf0f6!important;
+}
+tr.group_3 td {
+  background: #cedff6!important;
+}
+tr.group_4 td {
+  background: #eaf0f6!important;
+}
+tr.group_5 td {
+  background: #cedff6!important;
+}
+tr.group_6 td {
+  background: #eaf0f6!important;
+}
+tr.group_7 td {
+  background: #cedff6!important;
 }
