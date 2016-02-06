@@ -77,7 +77,6 @@ private function set_roleid($admidio_rolename)
 	}
 	$admroleid=$result->fetch_array();
 	$this->roleid=$admroleid[0];
-
 	return $this->roleid;
 }
 
@@ -101,26 +100,35 @@ function load_users()
 		        AND rol_cat_id = cat_id
 		        AND (  cat_org_id = '. $this->orgid. '
 		            OR cat_org_id IS NULL )) ';
+
 	$searchCondition="";
-//	$orderCondition="ORDER BY last_name.usd_value, first_name.usd_value";
+
+if (!empty($grouping_field)){
+$grouping_select=', grouping.usd_value as grouping';
+$grouping='LEFT JOIN '.TBL_USER_DATA.' as grouping
+		           ON grouping.usd_usr_id = usr_id
+		          AND grouping.usd_usf_id = '. $this->userfieldids[$grouping_field]['usf_id'];
 	$orderCondition="ORDER grouping, last_name, first_name";//unsortierte am Anfang
-	$orderCondition="ORDER BY CASE WHEN grouping is null THEN 1 ELSE 0 END, grouping, last_name, first_name";//unsortierte am Ende
-	$sql    = 'SELECT usr_id, last_name.usd_value as last_name, first_name.usd_value as first_name, birthday.usd_value as birthday, grouping.usd_value as grouping FROM `adm_users`
-		         JOIN `adm_user_data` as last_name
+	//$orderCondition="ORDER BY CASE WHEN grouping is null THEN 1 ELSE 0 END, grouping, last_name, first_name";//unsortierte am Ende
+}else
+{
+$grouping_select="";
+$grouping="";
+$orderCondition="ORDER BY last_name.usd_value, first_name.usd_value";
+}
+	$sql    = 'SELECT usr_id, last_name.usd_value as last_name, first_name.usd_value as first_name, birthday.usd_value as birthday '.$grouping_select.' FROM '. TBL_USERS. '
+		         JOIN '.TBL_USER_DATA.' as last_name
 		           ON last_name.usd_usr_id = usr_id
 		          AND last_name.usd_usf_id = '. $this->userfieldids['LAST_NAME']['usf_id']. '
-		         JOIN `adm_user_data` as first_name
+		         JOIN '.TBL_USER_DATA.' as first_name
 		           ON first_name.usd_usr_id = usr_id
 		          AND first_name.usd_usf_id = '.$this->userfieldids['FIRST_NAME']['usf_id']. '
-		         LEFT JOIN `adm_user_data` as birthday
+		         LEFT JOIN '.TBL_USER_DATA.' as birthday
 		           ON birthday.usd_usr_id = usr_id
-		          AND birthday.usd_usf_id = '. $this->userfieldids['BIRTHDAY']['usf_id']. '
-		         LEFT JOIN `adm_user_data` as grouping
-		           ON grouping.usd_usr_id = usr_id
-		          AND grouping.usd_usf_id = '. $this->userfieldids[$grouping_field]['usf_id']. '
+		          AND birthday.usd_usf_id = '. $this->userfieldids['BIRTHDAY']['usf_id'].
+				$grouping. '
 		         WHERE usr_valid = 1'.$memberCondition.$searchCondition.' '.$orderCondition.';';
 	$users=$this->db->query($sql);
-
 
 	if($users->num_rows==0)
 	{	

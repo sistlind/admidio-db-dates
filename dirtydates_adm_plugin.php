@@ -7,18 +7,9 @@
 
 
 require_once(substr(__FILE__, 0,strpos(__FILE__, 'adm_plugins')-1).'/adm_program/system/common.php');
-require_once(SERVER_PATH. '/adm_program/system/classes/formelements.php');
+#require_once(SERVER_PATH. '/adm_program/system/classes/formelements.php');
 require_once(SERVER_PATH. '/adm_program/system/classes/tabletext.php');
-
-
-$options=array('admidio_path'=>'../../../admidio',//pfad zur admidio installation
-				'org_id'=>$gCurrentOrganization->getValue('org_id'),				//organisations id von admidio(meist 1)
-				'adm_role'=>'Mitglieder',		//Mitglieder welcher Rolle sollen angezeigt werden
-				'group_field'=>'register',		//Feld, nachdem die Mitglieder gruppiert werden sollen
-				'dates_after'=>time()-(60*60*24)*1,//Nur bis gestern laden
-				'dates_before'=>time()+(60*60*24)*62,//Nur die nächsten 2 Monate
-				'use_dirtydates'=>true,//Dirtydates funktion wird genutzt und tabelle angelegt
-);
+require_once(SERVER_PATH. '/adm_plugins/admidio-db-dates/admidio_db_dates_config.php');
 
 
 if (!function_exists('print_dirtydates_menu')) {
@@ -26,17 +17,21 @@ if (!function_exists('print_dirtydates_menu')) {
 	{
 		$plugin_folder='admidio-db-dates';
 		global $gCurrentUser;
-		$awardmenu = new Menu('dirtydatesmenu', 'Terminzu/absagen');
-			$awardmenu->addItem('dirtydates_show', '/adm_plugins/'.$plugin_folder.'/dirtydates_adm_plugin.php?dd_userid=overview',
+
+		$dirtydatesmenu = new Menu('dirtydatesmenu', 'Terminzuabsagen');
+
+		//Falls Datenbank nicht vorhanden Install-Skript starten
+		$dirtydatesmenu->addItem('dirtydates_show', '/adm_plugins/'.$plugin_folder.'/dirtydates_adm_plugin.php?dd_userid=overview',
 					'Terminübersicht', '/icons/lists.png');
+
 		if($gCurrentUser->getValue('usr_id')!=0)
 		{
-			$awardmenu->addItem('dirtydates_change', '/adm_plugins/'.$plugin_folder.'/dirtydates_adm_plugin.php?dd_userid='.$gCurrentUser->getValue('usr_id').'','Meine Anwesenheit ändern', '/icons/profile.png');
+			$dirtydatesmenu->addItem('dirtydates_change', '/adm_plugins/'.$plugin_folder.'/dirtydates_adm_plugin.php?dd_userid='.$gCurrentUser->getValue('usr_id').'','Meine Anwesenheit ändern', '/icons/profile.png');
 		}
 
-		echo' <div id="plgAwards" class="admPluginContent">';
-		$awardmenu->show();  
-		echo' </div>';
+		echo '<div id="plgDirtydates" class="admidio-plugin-content">';
+		echo $dirtydatesmenu->show();  
+		echo '</div>';
 	}
 }
 
@@ -106,7 +101,10 @@ function dirtydates($userid,$options)
 	{
 		//tabelle erzeugen
 		$out="<table width=200 border=1>\n<tr>";
-		$out.="<th>Gruppe</th>";
+	
+		if(isset($options->group_field)){
+			$out.="<th>Gruppe</th>";
+		}
 		$out.="<th>Name</th>";
 		foreach( $dd->dates as $date)
 		{
@@ -116,7 +114,7 @@ function dirtydates($userid,$options)
 			$dataID[]=$date['dat_id'];
 		}
 		$out.= "</tr>\n<tr>";
-		$out.= "<td></td>";
+		if(isset($options->group_field)){$out.= "<td></td>";}
 		$out.= "<td>Termin</td>";
 		foreach($dd->dates as $date)
 		{
@@ -137,7 +135,7 @@ function dirtydates($userid,$options)
 		foreach( $dd->users as $user)
 		{
 			$out.= "<tr>";
-			$out.= "<td>".$user['group_name']."</td>";
+		if(isset($options->group_field)){	$out.= "<td>".$user['group_name']."</td>";}
 		if(!(($gCurrentUser->getValue('usr_id')===($user['usr_id']))||($gCurrentUser->editUsers() === true)))
 		{//only show name for others
 			$out.= "<td>".$user['first_name'].'&nbsp;'.$user['last_name']."</td>";
@@ -254,7 +252,6 @@ if (isset($_REQUEST['dd_userid']))
 	$page->show();
 }else
 {
-	$userid=NULL;
 	if($gCurrentUser->getValue('usr_id')!=0){
 		print_dirtydates_menu();
 	}
