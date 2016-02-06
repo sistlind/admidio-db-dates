@@ -9,6 +9,7 @@ private	   $roleid ='';
 private	   $orgid ='';
 private	   $tblname ='';
 private	   $options=NULL;
+private	   $db=null;
 
 public function __construct($options){
 	if (is_file(realpath(dirname(__FILE__).'/'.$options['admidio_path'].'/adm_my_files/config.php'))) {
@@ -25,30 +26,32 @@ public function __construct($options){
 	$this->orgid=$options['org_id'];
 	$this->options=$options;
 
-	$mysqli = new mysqli($g_adm_srv, $g_adm_usr, $g_adm_pw, $g_adm_db);
+	try {
 
-	if (!$mysqli) {
-		die('Connect Error (' . mysqli_connect_errno() . ') '
-		        . mysqli_connect_error());
+	  # MySQL with PDO_MYSQL
+	  	$this->db= new PDO("mysql:host=$g_adm_srv;dbname=$g_adm_db;charset=utf8", $g_adm_usr, $g_adm_pw);
+	 }
+	catch(PDOException $e) {
+		echo $e->getMessage();
 	}
-	if (!$mysqli->set_charset("utf8")) {
-    	printf("Error loading character set utf8: %s\n", $mysqli->error);
+	
+	if(!$this->load_dates($options['dates_after'],$options['dates_before']))
+	{
+	//echo "No dates found";
 	}
-
-	$this->db=$mysqli;
-	$this->load_dates($options['dates_after'],$options['dates_before']);
 	if($options['use_dirtydates'])
 	{
+		$this->set_roleid($options['adm_role']);
 		$this->tblname=$g_tbl_praefix.'_dirtydates';
 		$this->check_install_db();
-		$this->set_roleid($options['adm_role']);
+
 		$this->load_users();
 		$this->load_status();
 	}
-	
+
 }
 function __destruct() {
-	$this->db->close();
+	$this->db=null;
 }
 
 
@@ -69,14 +72,15 @@ function get_user_by_id($userid)
 
 private function set_roleid($admidio_rolename)
 {
-	$result = $this->db->query('SELECT * FROM '. TBL_ROLES .' where rol_name=\''.$admidio_rolename.'\' Limit 1');
-
-	if($result->num_rows===0)
+	$sql='SELECT * FROM '. TBL_ROLES .' where rol_name=\''.$admidio_rolename.'\' Limit 1';
+	$result = $this->db->query($sql);
+	$admroleid=$result->fetch();
+	if(!$admroleid)
 	{
 		die('Rolle nicht gefunden!');
 	}
-	$admroleid=$result->fetch_array();
-	$this->roleid=$admroleid[0];
+
+	$this->roleid=$admroleid['rol_id'];
 	return $this->roleid;
 }
 
@@ -130,27 +134,28 @@ $orderCondition="ORDER BY last_name.usd_value, first_name.usd_value";
 		         WHERE usr_valid = 1'.$memberCondition.$searchCondition.' '.$orderCondition.';';
 	$users=$this->db->query($sql);
 
-	if($users->num_rows==0)
+/*	if(empty($users))
 	{	
 		echo "No user found @role ".$this->options['adm_role'];
 		return false;
 	}
-
+*/
 	$this->users = array();
 
-	while($user = $users->fetch_array())
+	while($user = $users->fetch())
 	{
 		$this->users[$user['usr_id']]=$user;
-		if($this->userfieldids[$grouping_field]['usf_type']==='DROPDOWN')
-		{
-			$groupnames=explode("\n",$this->userfieldids[$grouping_field]['usf_value_list']);
-			$this->users[$user['usr_id']]['group_name']=$groupnames[intval($user['grouping'])-1];
-		}else
-		{
-			$this->users[$user['usr_id']]['group_name']=$user['grouping'];
+		if (!empty($grouping_field)){
+			if($this->userfieldids[$grouping_field]['usf_type']==='DROPDOWN')
+			{
+				$groupnames=explode("\n",$this->userfieldids[$grouping_field]['usf_value_list']);
+				$this->users[$user['usr_id']]['group_name']=$groupnames[intval($user['grouping'])-1];
+			}else
+			{
+				$this->users[$user['usr_id']]['group_name']=$user['grouping'];
+			}
 		}
 	}
-
 	if(empty($this->users))
 	{
 		return false;
@@ -164,19 +169,20 @@ $orderCondition="ORDER BY last_name.usd_value, first_name.usd_value";
 
 function load_dates($display_after_timestamp,$display_before_timestamp)
 {
+
+
 	$sql='SELECT * FROM '. TBL_DATES.'
 		where `dat_begin` >=\''.date('Y-m-d H:i:s',$display_after_timestamp).'\'
 		AND  `dat_end` <=\''.date('Y-m-d H:i:s',$display_before_timestamp).'\'
 		ORDER BY `'. TBL_DATES.'`.`dat_begin` ASC';
-	//echo $sql;
 	$dates =$this->db->query($sql);
 
-	if($dates->num_rows===0)
+	if($dates==null)
 	{
 		return false;
 	}
 
-	while($date = $dates->fetch_array())
+	while($date = $dates->fetch())
 		{
 			$this->dates[$date['dat_id']]=$date;
 		}
@@ -201,12 +207,12 @@ function load_status()
 
 	$status =$this->db->query($sql);
 
-	if($status->num_rows===0)
+	if(status==null)
 	{
 		return false;
-	}
+	}	
 
-	while($state = $status->fetch_array())
+	while($state = $status->fetch())
 		{
 			if(isset($this->dates[$state['dd_date_id']]))
 			{
@@ -232,7 +238,7 @@ function save_status($userid,$changes)
 		$status=$value['status'];
 		$comment=$value['comment'];
 		if(!isset($this->status[$userid][$dateid]['dd_status'])||($this->status[$userid][$dateid]['dd_status']!==$status)||($this->status[$userid][$dateid]['dd_comment']!==$comment)){
-			$sql='INSERT INTO `'.$this->tblname.'` 
+			$sql='INSERT INTO '.$this->tblname.'
 				(dd_usr_id,dd_date_id,dd_status,dd_comment,dd_usr_id_create) 
 				VALUES ('.$userid.','.$dateid.','.$status.',\''.$comment.'\',\''.$createdby.'\')
 				ON DUPLICATE KEY UPDATE 
@@ -251,10 +257,10 @@ function check_install_db()
 	{
 		die('Dirtydates disabled, enable in options.php!');
 	}
-	$sql='SHOW TABLES LIKE \''.$this->tblname.'\';';
 
-	$result =$this->db->query($sql);
-	if($result->num_rows===1)
+	$tableExists = $this->db->query('SELECT count(*) FROM '.$this->tblname);
+
+	if($tableExists!=null&&$tableExists->fetch()[0] >= 0)
 	{
 		return true;
 	}else{
@@ -286,9 +292,12 @@ private function install_db()
 
 private function load_user_fields()
 {
-	$sql='SELECT * FROM `'.TBL_USER_FIELDS.'`';
+
+	$sql='SELECT * FROM '.TBL_USER_FIELDS;
+
 	$userfields =$this->db->query($sql);
-	while($userfield = $userfields->fetch_array())
+	
+	while($userfield = $userfields->fetch())
 	{
 		$this->userfieldids[$userfield['usf_name_intern']]=$userfield;
 	}

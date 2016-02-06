@@ -49,7 +49,7 @@ function dirtydates($userid,$options)
 	//Ansichts-Menü darstellen
 	$form="<form action=".$formcallback." method=post\n>";
 	$form.="<select size=\"1\" name=\"dd_userid\" class=\"eingabetext\">";
-	$form.= "<option value=\"" . "--" . "\">";
+	$form.= "<option value=\"" . "overview" . "\">";
 	$form.= "User auswählen";
 	$form.= "</option>\n";
 
@@ -188,9 +188,14 @@ function dirtydates($userid,$options)
 		$out.= "<p><font size=+4 color=red>".$user['first_name']." ".$user['last_name']."</font></p>\n";
 		$out.= "<form action=".$formcallback." method=post>";
 		$out.= "<table border=1>\n";
-		$out.= '<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th><th>JA&nbsp;-&nbsp;?&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th><th>Kommentar</th></tr>';
-
-
+		$out.= "<tr><th>Termin</th><th>Datum</th><th>weitere Infos</th>";
+		if($options['allow_maybe'])			
+		{
+			$out.= '<th>JA&nbsp;-&nbsp;?&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th>';
+		}else{
+			$out.= '<th>JA&nbsp;-&nbsp;Nein&nbsp;-&nbsp;Reset</th>';
+		}
+		$out.="<th>Kommentar</th></tr>";
 		foreach($dd->dates as $date)
 		{//pro termin eine reihe!
 			$time=strtotime($date['dat_begin']);
@@ -213,10 +218,13 @@ function dirtydates($userid,$options)
 			$out.= "<td>".$date['dat_description']."</td>";
 
 
-			$out.= "<td><input type=radio name=status_new_".$date['dat_id']." value=1 ".$checked_yes."> 
-				<input type=radio name=status_new_".$date['dat_id']." value=3 ".$checked_perhaps.">
-				<input type=radio name=status_new_".$date['dat_id']." value=2 ".$checked_no.">
-				<input type=radio name=status_new_".$date['dat_id']." value=0 ></td>";
+			$out.= "<td><input type=radio name=status_new_".$date['dat_id']." value=1 ".$checked_yes.">"; 
+			if($options['allow_maybe'])			
+			{
+				$out.= "	<input type=radio name=status_new_".$date['dat_id']." value=3 ".$checked_perhaps.">";
+			}
+			$out.= "	<input type=radio name=status_new_".$date['dat_id']." value=2 ".$checked_no.">";
+			$out.= "	<input type=radio name=status_new_".$date['dat_id']." value=0 ></td>";
 			$out.= "<td><input type=text name=status_new_comment_".$date['dat_id']." value=\"".$oldcomment."\">"; 
 			$out.= "</tr>\n";
 			}
