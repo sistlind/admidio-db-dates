@@ -97,9 +97,9 @@ function show_dates($atts){
 
 		$out.="<td>".$date['dat_headline']."</td>";
 		$out.="<td>".$date['dat_location']."</td>";
-		preg_match('/<p>\s(.*)<\/p>/s',$date['dat_description'],$matches);
-		//print_r($matches);
-		$out.="<td>".$matches[1]."</td>";
+		preg_match('/^<p>(.*)<\/p>.$/s',$date['dat_description'],$matches);
+		//print_r($date['dat_description']);
+		$out.="<td>".trim($matches[1])."</td>";
 		$out.="</tr>";
 
 	}
